@@ -1,1 +1,45 @@
+name: Build Windows Qt App
 
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.11.2
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+
+      - name: Configure CMake
+        run: cmake -S w2 -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Deploy Qt libraries
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force deployment
+          Copy-Item build\Release\w2.exe deployment\
+          windeployqt --release deployment\w2.exe
+
+      - name: Create ZIP
+        shell: powershell
+        run: |
+          Compress-Archive -Path deployment\* -DestinationPath BTH545_Workshop2_Windows.zip
+
+      - name: Upload deployment ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: BTH545_Workshop2_Windows
+          path: BTH545_Workshop2_Windows.zip
