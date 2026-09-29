@@ -6,11 +6,16 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -19,6 +24,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2022_64
+          setup-python: false
 
       - name: Configure CMake
         run: cmake -S w2 -B build -G "Visual Studio 17 2022" -A x64
